@@ -17,6 +17,7 @@ void NowArr(); // 현재 맵상태 보여주기
 void ClearArr(); // 배열 비우는 함수
 int CheckClear(); // 맵 클리어 체크 함수
 void Command(); // 명령어 실행 함수
+void DisplayHelp(); // 명령어 목록을 보여주는 함수
 
 int getch(){ // getch함수 생성
     int ch;
@@ -81,7 +82,7 @@ void Command() { // 명령어 실행 함수
             break;
         }
         if (cmd=='d') // 명령어 목록 보여주기 명령
-            ;
+            DisplayHelp();
         if (cmd=='s') // 맵 세이브 명령
             ;
         if (cmd=='f') // 맵 불러오기 명령
@@ -186,6 +187,11 @@ int CheckClear() { // 맵 클리어 체크 함수
         }
     }
     return chk;
+}
+
+void DisplayHelp(){ // 명령어 목록을 보여주는 함수
+    system("clear");
+    printf("h(왼쪽), j(아래), k(위), l(오른쪽)\nu(undo)\nr(replay)\nn(new)\ne(exit)\ns(save)\nf(file load)\nd(display help)\nt(top)\n");
 }
 
 void ClearArr(){ // 배열 비우는 함수
