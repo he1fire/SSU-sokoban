@@ -1,33 +1,33 @@
 #include <stdio.h>
 #include <termio.h>
 #include <windows.h>
-char allmap[5][30][30]; // ì „ì²´ ë§µ ë°°ì—´
-char arr[30][30]; // ì´ë²ˆ ë¼ìš´ë“œ ë§µ ë°°ì—´
-char username[10]; // ìœ ì € ì´ë¦„
-char undoMap[5][30][30]; // Undo ë§µ ë°°ì—´
-int correctmap=1; // ì˜ëª»ëœë§µ ì²´í¬
-int level=0; // í˜„ì¬ ë¼ìš´ë“œ
-int ex=0; // ê²Œì„ì¢…ë£Œ ì²´í¬
-int cntmv=0; // ì´ë™ íšŸìˆ˜
-int cntud=5; // Undo ì œí•œ íšŸìˆ˜
-int x=0, xx=0, y=0, yy=0;
+char allmap[5][30][30]; // ÀüÃ¼ ¸Ê ¹è¿­
+char arr[30][30]; // ÀÌ¹ø ¶ó¿îµå ¸Ê ¹è¿­
+char username[10]; // À¯Àú ÀÌ¸§
+char undomap[5][30][30]; // Undo ¸Ê ¹è¿­
+int correctmap=1; // Àß¸øµÈ¸Ê Ã¼Å©
+int level=0; // ÇöÀç ¶ó¿îµå
+int ex=0; // °ÔÀÓÁ¾·á Ã¼Å©
+int cntmv=0; // ÀÌµ¿ È½¼ö
+int cntud=5; // Undo Á¦ÇÑ È½¼ö
+int x=0, y=0;
 
-int getch(); // getchí•¨ìˆ˜ ìƒì„±
-void MakeMap(); // ì „ì²´ ë§µì„ íŒŒì¼ì—ì„œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
-void MakeArr(); // ë§µì„ arrë¡œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
-void CheckArr(); // ì˜ëª»ëœ ë§µì¸ì§€ ì²´í¬í•˜ëŠ” í•¨ìˆ˜
-void NowArr(); // í˜„ì¬ ë§µìƒíƒœ ë³´ì—¬ì£¼ê¸°
-void ClearArr(); // ë°°ì—´ ë¹„ìš°ëŠ” í•¨ìˆ˜
-int CheckClear(); // ë§µ í´ë¦¬ì–´ ì²´í¬ í•¨ìˆ˜
-void Command(); // ëª…ë ¹ì–´ ì‹¤í–‰ í•¨ìˆ˜
-void DisplayHelp(); // ëª…ë ¹ì–´ ëª©ë¡ì„ ë³´ì—¬ì£¼ëŠ” í•¨ìˆ˜
-void ClearUndo(); // Undo ë§µ ë°°ì—´ ì´ˆê¸°í™” í•¨ìˆ˜
-void SaveUndo(); // Undo ë§µ ë°°ì—´ ì €ì¥ í•¨ìˆ˜
-int LoadUndo(); // ì €ì¥ëœ Undo ë§µ ë¶ˆëŸ¬ì˜¤ê¸° í•¨ìˆ˜
+int getch(); // getchÇÔ¼ö »ı¼º
+void MakeMap(); // ÀüÃ¼ ¸ÊÀ» ÆÄÀÏ¿¡¼­ ¹Ş¾Æ¿À´Â ÇÔ¼ö
+void MakeArr(); // ¸ÊÀ» arr·Î ¹Ş¾Æ¿À´Â ÇÔ¼ö
+void CheckArr(); // Àß¸øµÈ ¸ÊÀÎÁö Ã¼Å©ÇÏ´Â ÇÔ¼ö
+void NowArr(); // ÇöÀç ¸Ê»óÅÂ º¸¿©ÁÖ±â
+void ClearArr(); // ¹è¿­ ºñ¿ì´Â ÇÔ¼ö
+int CheckClear(); // ¸Ê Å¬¸®¾î Ã¼Å© ÇÔ¼ö
+void Command(); // ¸í·É¾î ½ÇÇà ÇÔ¼ö
+void DisplayHelp(); // ¸í·É¾î ¸ñ·ÏÀ» º¸¿©ÁÖ´Â ÇÔ¼ö
+void ClearUndo(); // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
+void SaveUndo(); // Undo ¸Ê ¹è¿­ ÀúÀå ÇÔ¼ö
+int LoadUndo(); // ÀúÀåµÈ Undo ¸Ê ºÒ·¯¿À±â ÇÔ¼ö
 void LocateCharacter();
 int MoveCharacter(char c);
 
-int getch(){ // getchí•¨ìˆ˜ ìƒì„±
+int getch(){ // getchÇÔ¼ö »ı¼º
     int ch;
     struct termios buf, save;
     tcgetattr(0,&save);
@@ -41,8 +41,11 @@ int getch(){ // getchí•¨ìˆ˜ ìƒì„±
     return ch;
 }
 
-int main() { // .==ë¹ˆì¹¸, @==ìºë¦­í„°, #==ë²½, $==ë°•ìŠ¤, O==ë°•ìŠ¤ë¥¼ ì±„ìš¸ê³³
+int main() { // .==ºóÄ­, @==Ä³¸¯ÅÍ, #==º®, $==¹Ú½º, O==¹Ú½º¸¦ Ã¤¿ï°÷
     MakeMap();
+    printf ("ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä: ");
+    scanf("%s", &username);
+    printf("Hello %s!\n", username);
     for (;level<5;level++){
         ClearArr();
         ClearUndo();
@@ -53,76 +56,73 @@ int main() { // .==ë¹ˆì¹¸, @==ìºë¦­í„°, #==ë²½, $==ë°•ìŠ¤, O==ë°•ìŠ¤ë¥¼ ì±„ìš¸ê
         else
             printf("Start Map%d!\n", level+1);
         Command();
-        if (ex) // ê²Œì„ ì¢…ë£Œ ëª…ë ¹
+        if (ex) // °ÔÀÓ Á¾·á ¸í·É
             break;
         cntmv=0;
     }
     if (!ex)
-        printf("\nëª¨ë“ ë§µì„ í´ë¦¬ì–´ í•˜ì˜€ìŠµë‹ˆë‹¤\n");
+        printf("\n¸ğµç¸ÊÀ» Å¬¸®¾î ÇÏ¿´½À´Ï´Ù\n");
     return 0;
 }
 
-void Command() { // ëª…ë ¹ì–´ ì‹¤í–‰ í•¨ìˆ˜
-    printf ("ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”: ");
-    scanf("%s", &username);
-    printf("Hello %s!\n", username);
+void Command() { // ¸í·É¾î ½ÇÇà ÇÔ¼ö
     LocateCharacter();
     NowArr();
     while (1){
         char cmd;
         cmd=getch();
-        if (cmd=='h' || cmd=='j' || cmd=='k' || cmd=='l') // ì´ë™ ëª…ë ¹
-            ;
-        if (cmd=='n'){ // ì²˜ìŒë¶€í„° ë‹¤ì‹œì‹œì‘ ëª…ë ¹
+        if (cmd=='h' || cmd=='j' || cmd=='k' || cmd=='l') // ÀÌµ¿ ¸í·É
+            MoveCharacter(cmd);
+        if (cmd=='n'){ // Ã³À½ºÎÅÍ ´Ù½Ã½ÃÀÛ ¸í·É
             level=-1;
-            printf("ì²˜ìŒë¶€í„° ë‹¤ì‹œì‹œì‘í•©ë‹ˆë‹¤.\n");
+            printf("Ã³À½ºÎÅÍ ´Ù½Ã½ÃÀÛÇÕ´Ï´Ù.\n");
             break;
         }
-        if (cmd=='r'){ // ì´ë²ˆ ë§µ ë‹¤ì‹œì‹œì‘ ëª…ë ¹
-            printf("ì´ë²ˆ ë§µì„ ë‹¤ì‹œì‹œì‘í•©ë‹ˆë‹¤.\n");
+        if (cmd=='r'){ // ÀÌ¹ø ¸Ê ´Ù½Ã½ÃÀÛ ¸í·É
+            printf("ÀÌ¹ø ¸ÊÀ» ´Ù½Ã½ÃÀÛÇÕ´Ï´Ù.\n");
             MakeArr();
             NowArr();
         }
-        if (cmd=='e'){ // ê²Œì„ ì¢…ë£Œ ëª…ë ¹
+        if (cmd=='e'){ // °ÔÀÓ Á¾·á ¸í·É
             ex=1;
-            printf("ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
+            printf("°ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù.\n");
             break;
         }
-        if (cmd=='x') {// ì„ì‹œ í´ë¦¬ì–´ ëª…ë ¹ì–´ (ë‚˜ì¤‘ì— ì§€ìš¸ì˜ˆì •)
+        if (cmd=='x') {// ÀÓ½Ã Å¬¸®¾î ¸í·É¾î (³ªÁß¿¡ Áö¿ï¿¹Á¤)
             break;
         }
-        if (cmd=='d') // ëª…ë ¹ì–´ ëª©ë¡ ë³´ì—¬ì£¼ê¸° ëª…ë ¹
+        if (cmd=='d') // ¸í·É¾î ¸ñ·Ï º¸¿©ÁÖ±â ¸í·É
             DisplayHelp();
-        if (cmd=='s') // ë§µ ì„¸ì´ë¸Œ ëª…ë ¹
+        if (cmd=='s') // ¸Ê ¼¼ÀÌºê ¸í·É
             ;
-        if (cmd=='f') // ë§µ ë¶ˆëŸ¬ì˜¤ê¸° ëª…ë ¹
+        if (cmd=='f') // ¸Ê ºÒ·¯¿À±â ¸í·É
             ;
-        if (cmd=='t'){ // ë­í‚¹ ë¶ˆëŸ¬ì˜¤ê¸° ëª…ë ¹
+        if (cmd=='t'){ // ·©Å· ºÒ·¯¿À±â ¸í·É
             ;
         }
-        if (cmd=='u') // ë§µ ë˜ëŒë¦¬ê¸° ëª…ë ¹
+        if (cmd=='u') // ¸Ê µÇµ¹¸®±â ¸í·É
             LoadUndo();
             ;
-        if (CheckClear()){// ë§µ í´ë¦¬ì–´ ì²´í¬
-            printf("Clear Map! %s!\nì´ ì´ë™íšŸìˆ˜ëŠ” %dë²ˆ ì…ë‹ˆë‹¤\n", username, cntmv);
+        if (CheckClear()){// ¸Ê Å¬¸®¾î Ã¼Å©
+            printf("Clear Map! %s!\nÃÑ ÀÌµ¿È½¼ö´Â %d¹ø ÀÔ´Ï´Ù\n", username, cntmv);
             break;
         }
     }
 }
 
-void MakeMap(){ // ì „ì²´ ë§µì„ íŒŒì¼ì—ì„œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
+void MakeMap(){ // ÀüÃ¼ ¸ÊÀ» ÆÄÀÏ¿¡¼­ ¹Ş¾Æ¿À´Â ÇÔ¼ö
     FILE *fp;
     fp=fopen("map", "r");
     fscanf(fp,"%s");
     for (int x=0;feof(fp)==0;x++){
-        char newmap[30][30]; // ì„ì‹œ ë§µ ë°°ì—´
+        char newmap[30][30]; // ÀÓ½Ã ¸Ê ¹è¿­
         for (int i=0;i<30;i++){
             for (int j=0;j<30;j++){
                 newmap[i][j]='X';
             }
         }
         for (int i=0;1;i++){
-            char str[30]; // í•œì¤„ ì…ë ¥ë°›ëŠ” ë°°ì—´
+            char str[30]; // ÇÑÁÙ ÀÔ·Â¹Ş´Â ¹è¿­
             for (int j=0;j<30;j++){
                 str[j]='X';
             }
@@ -145,7 +145,7 @@ void MakeMap(){ // ì „ì²´ ë§µì„ íŒŒì¼ì—ì„œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
     fclose(fp);
 }
 
-void MakeArr() { // ë§µì„ arrë¡œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
+void MakeArr() { // ¸ÊÀ» arr·Î ¹Ş¾Æ¿À´Â ÇÔ¼ö
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
             arr[i][j]=allmap[level][i][j];
@@ -153,7 +153,7 @@ void MakeArr() { // ë§µì„ arrë¡œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
     }
 }
 
-void CheckArr() { // ì˜ëª»ëœ ë§µì¸ì§€ ì²´í¬í•˜ëŠ” í•¨ìˆ˜
+void CheckArr() { // Àß¸øµÈ ¸ÊÀÎÁö Ã¼Å©ÇÏ´Â ÇÔ¼ö
     int check1=0, check2=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
@@ -171,7 +171,7 @@ void CheckArr() { // ì˜ëª»ëœ ë§µì¸ì§€ ì²´í¬í•˜ëŠ” í•¨ìˆ˜
         printf("Map%d is Correct Map!\n", level+1);
 }
 
-void NowArr() { // í˜„ì¬ ë§µìƒíƒœ ë³´ì—¬ì£¼ê¸°
+void NowArr() { // ÇöÀç ¸Ê»óÅÂ º¸¿©ÁÖ±â
     system("clear");
     for (int i=0;i<30;i++){
         if (arr[i][0]=='X')
@@ -186,7 +186,7 @@ void NowArr() { // í˜„ì¬ ë§µìƒíƒœ ë³´ì—¬ì£¼ê¸°
         }
         printf("\n");
     }
-    printf ("\n\nì´ë™íšŸìˆ˜: %d\n", cntmv);
+    printf ("\n\nÀÌµ¿È½¼ö: %d\n³²Àº µÇµ¹¸®±âÈ½¼ö: %d\n", cntmv, cntud);
 }
 
 void LocateCharacter () {
@@ -222,6 +222,8 @@ int MoveCharacter(char c) {
   }
   x += moveX;
   y += moveY;
+  int xx = x + moveX;
+  int yy = y + moveY;
   switch (arr[y][x]) {
     case '#':
     {
@@ -231,8 +233,6 @@ int MoveCharacter(char c) {
     }
     case '$':
     {
-      xx = x + moveX;
-      yy = y + moveY;
       if (arr[yy][xx] == '#' || arr[yy][xx] == '$'){
         NowArr();
         return 0;
@@ -253,7 +253,7 @@ int MoveCharacter(char c) {
   return 0;
 }
 
-int CheckClear() { // ë§µ í´ë¦¬ì–´ ì²´í¬ í•¨ìˆ˜
+int CheckClear() { // ¸Ê Å¬¸®¾î Ã¼Å© ÇÔ¼ö
     int chk=1;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
@@ -264,12 +264,12 @@ int CheckClear() { // ë§µ í´ë¦¬ì–´ ì²´í¬ í•¨ìˆ˜
     return chk;
 }
 
-void DisplayHelp(){ // ëª…ë ¹ì–´ ëª©ë¡ì„ ë³´ì—¬ì£¼ëŠ” í•¨ìˆ˜
+void DisplayHelp(){ // ¸í·É¾î ¸ñ·ÏÀ» º¸¿©ÁÖ´Â ÇÔ¼ö
     system("clear");
-    printf("h(ì™¼ìª½), j(ì•„ë˜), k(ìœ„), l(ì˜¤ë¥¸ìª½)\nu(undo)\nr(replay)\nn(new)\ne(exit)\ns(save)\nf(file load)\nd(display help)\nt(top)\n");
+    printf("h(¿ŞÂÊ), j(¾Æ·¡), k(À§), l(¿À¸¥ÂÊ)\nu(undo)\nr(replay)\nn(new)\ne(exit)\ns(save)\nf(file load)\nd(display help)\nt(top)\n");
 }
 
-void ClearArr(){ // ë°°ì—´ ë¹„ìš°ëŠ” í•¨ìˆ˜
+void ClearArr(){ // ¹è¿­ ºñ¿ì´Â ÇÔ¼ö
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
             arr[i][j]='X';
@@ -277,53 +277,58 @@ void ClearArr(){ // ë°°ì—´ ë¹„ìš°ëŠ” í•¨ìˆ˜
     }
 }
 
-void ClearUndo () { // Undo ë§µ ë°°ì—´ ì´ˆê¸°í™” í•¨ìˆ˜
+void ClearUndo () { // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
   cntud = 5;
   for (int x=0; x<5; x++) {
     for (int i=0; i<30; i++) {
       for (int j=0; j<30; j++) {
-        undoMap[x][i][j] = 'X';
+        undomap[x][i][j] = 'X';
       }
     }
   }
 }
 
-  void SaveUndo () { // Undo ë§µ ë°°ì—´ì— í˜„ì¬ ë§µ ì €ì¥
-    for (int x=0; x<4; x++) {
+  void SaveUndo () { // Undo ¸Ê ¹è¿­¿¡ ÇöÀç ¸Ê ÀúÀå
+    for (int x=4; x>0; x--) {
       for (int i=0; i<30; i++) {
         for (int j=0; j<30; j++) {
-          undoMap[x+1][i][j] = undoMap[x][i][j];
+          undomap[x][i][j] = undomap[x-1][i][j];
         }
       }
     }
 
     for (int i=0; i<30; i++) { 
       for (int j=0; j<30; j++) {
-        undoMap[0][i][j] = arr[i][j];
+        undomap[0][i][j] = arr[i][j];
       }
     }
   }
 
-  int LoadUndo () { // ì €ì¥ëœ Undo ë§µ ë°°ì—´ ë¶ˆëŸ¬ì˜¤ê¸° í•¨ìˆ˜
+  int LoadUndo () { // ÀúÀåµÈ Undo ¸Ê ¹è¿­ ºÒ·¯¿À±â ÇÔ¼ö
     cntmv++;
     cntud--;
-    if (cntud < 0 || cntmv == 1){
-      printf("ë˜ëŒë¦¬ê¸°ë¥¼ í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n");
+    if (cntud < 0 || undomap[0][0][0]=='X'){
+      printf("µÇµ¹¸®±â¸¦ ÇÒ ¼ö ¾ø½À´Ï´Ù.\n");
       return 0;
     }
 
     for (int i=0; i<30; i++) {
       for (int j=0; j<30; j++) {
-        arr[i][j] = undoMap[0][i][j];
+        arr[i][j] = undomap[0][i][j];
       }
     }
 
     for (int x=0; x<5; x++) {
       for (int i=0; i<30; i++) {
         for (int j=0; j<30; j++) {
-          undoMap[x][i][j] = undoMap[x+1][i][j];
+          undomap[x][i][j] = undomap[x+1][i][j];
         }
       }
+    }
+    for (int i=0;i<30;i++){
+        for (int j=0;j<30;j++){
+            undomap[4][i][j]='X';
+        }
     }
     NowArr();
     return 0;
