@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <termio.h>
 #include <windows.h>
-char allmap[5][30][30]; // 전체 맵 배열
-char arr[30][30]; // 이번 라운드 맵 배열
+char allmap[5][31][31]; // 전체 맵 배열
+char arr[31][31]; // 이번 라운드 맵 배열
 char username[10]; // 유저 이름
-char undomap[5][30][30]; // Undo 맵 배열
+char undomap[5][31][31]; // Undo 맵 배열
 int correctmap=1; // 잘못된맵 체크
 int level=0; // 현재 라운드
 int ex=0; // 게임종료 체크
 int cntmv=0; // 이동 횟수
 int cntud=5; // Undo 제한 횟수
-int x=0, y=0;
+int x=-1, y=-1;
 
 int getch(); // getch함수 생성
 void MakeMap(); // 전체 맵을 파일에서 받아오는 함수
@@ -66,7 +66,10 @@ int main() { // .==빈칸, @==캐릭터, #==벽, $==박스, O==박스를 채울곳
 }
 
 void Command() { // 명령어 실행 함수
-    LocateCharacter();
+    
+    if(x == -1 && y == -1) {
+        LocateCharacter();
+    }
     NowArr();
     while (1){
         char cmd;
@@ -115,7 +118,7 @@ void MakeMap(){ // 전체 맵을 파일에서 받아오는 함수
     fp=fopen("map", "r");
     fscanf(fp,"%s");
     for (int x=0;feof(fp)==0;x++){
-        char newmap[30][30]; // 임시 맵 배열
+        char newmap[31][31]; // 임시 맵 배열
         for (int i=0;i<30;i++){
             for (int j=0;j<30;j++){
                 newmap[i][j]='X';
@@ -204,7 +207,9 @@ void LocateCharacter () {
 int MoveCharacter(char c) {
   cntmv++;
   SaveUndo();
-  LocateCharacter();
+  if(x == -1 && y == -1) {
+    LocateCharacter();
+  }
   int moveX = 0, moveY = 0;
   switch (c) {
     case 'h':
