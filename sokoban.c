@@ -10,6 +10,7 @@ int level=0; // 현재 라운드
 int ex=0; // 게임종료 체크
 int cntmv=0; // 이동 횟수
 int cntud=5; // Undo 제한 횟수
+int x=0, xx=0, y=0, yy=0;
 
 int getch(); // getch함수 생성
 void MakeMap(); // 전체 맵을 파일에서 받아오는 함수
@@ -23,6 +24,8 @@ void DisplayHelp(); // 명령어 목록을 보여주는 함수
 void ClearUndo(); // Undo 맵 배열 초기화 함수
 void SaveUndo(); // Undo 맵 배열 저장 함수
 int LoadUndo(); // 저장된 Undo 맵 불러오기 함수
+void LocateCharacter();
+int MoveCharacter(char c);
 
 int getch(){ // getch함수 생성
     int ch;
@@ -63,6 +66,7 @@ void Command() { // 명령어 실행 함수
     printf ("이름을 입력하세요: ");
     scanf("%s", &username);
     printf("Hello %s!\n", username);
+    LocateCharacter();
     NowArr();
     while (1){
         char cmd;
@@ -183,6 +187,70 @@ void NowArr() { // 현재 맵상태 보여주기
         printf("\n");
     }
     printf ("\n\n이동횟수: %d\n", cntmv);
+}
+
+void LocateCharacter () {
+  for (int i=0; i<30; i++) {
+    for (int j=0; j<30; j++) {
+      if (arr[i][j]=='@'){
+        x=j;
+        y=i;
+        break;
+      }
+    }
+  }
+}
+
+int MoveCharacter(char c) {
+  cntmv++;
+  SaveUndo();
+  LocateCharacter();
+  int moveX = 0, moveY = 0;
+  switch (c) {
+    case 'h':
+      moveY = -1;
+      break;
+    case 'j':
+      moveX = -1;
+      break;
+    case 'k':
+      moveX = +1;
+      break;
+    case 'l':
+      moveY = +1;
+      break;
+  }
+  x += moveX;
+  y += moveY;
+  switch (arr[y][x]) {
+    case '#':
+    {
+      NowArr();
+      return 0;
+      break;
+    }
+    case '$':
+    {
+      xx = x + moveX;
+      yy = y + moveY;
+      if (arr[yy][xx] == '#' || arr[yy][xx] == '$'){
+        NowArr();
+        return 0;
+      }
+    }
+      arr[yy][xx] = '$';
+      if (allmap[level][y][x] == 'O')
+        arr[y][x] = 'O';
+      else
+        arr[y][x] = '.';
+  }
+  arr[y][x] = '@';
+  if (allmap[level][y-moveY][x-moveX] == 'O')
+    arr[y-moveY][x-moveX] = 'O';
+  else
+    arr[y-moveY][x-moveX] = '.';
+  NowArr();
+  return 0;
 }
 
 int CheckClear() { // 맵 클리어 체크 함수
