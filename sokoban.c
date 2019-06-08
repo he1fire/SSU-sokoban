@@ -87,9 +87,7 @@ void Command() { // 명령어 실행 함수
         if (cmd=='r'){ // 이번 맵 다시시작 명령
             printf("이번 맵을 다시시작합니다.\n");
             x=-1, y=-1;
-            cntmv=0;
             MakeArr();
-            ClearUndo();
             NowArr();
             LocateCharacter();
         }
