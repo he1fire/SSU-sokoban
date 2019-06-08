@@ -24,6 +24,8 @@ void DisplayHelp(); // 명령어 목록을 보여주는 함수
 void ClearUndo(); // Undo 맵 배열 초기화 함수
 void SaveUndo(); // Undo 맵 배열 저장 함수
 int LoadUndo(); // 저장된 Undo 맵 불러오기 함수
+void SaveMap();
+void LoadMap();
 void LocateCharacter();
 int MoveCharacter(char c);
 
@@ -85,8 +87,11 @@ void Command() { // 명령어 실행 함수
         if (cmd=='r'){ // 이번 맵 다시시작 명령
             printf("이번 맵을 다시시작합니다.\n");
             x=-1, y=-1;
+            cntmv=0;
             MakeArr();
+            ClearUndo();
             NowArr();
+            LocateCharacter();
         }
         if (cmd=='e'){ // 게임 종료 명령
             ex=1;
@@ -99,9 +104,11 @@ void Command() { // 명령어 실행 함수
         if (cmd=='d') // 명령어 목록 보여주기 명령
             DisplayHelp();
         if (cmd=='s') // 맵 세이브 명령
-            ;
-        if (cmd=='f') // 맵 불러오기 명령
-            ;
+            SaveMap();
+        if (cmd=='f'){ // 맵 불러오기 명령
+            LoadMap();
+            LocateCharacter();
+        }
         if (cmd=='t'){ // 랭킹 불러오기 명령
             ;
         }
@@ -289,6 +296,8 @@ void ClearArr(){ // 배열 비우는 함수
 }
 
 void ClearUndo () { // Undo 맵 배열 초기화 함수
+  x=-1;
+  y=-1;
   cntud = 5;
   for (int x=0; x<5; x++) {
     for (int i=0; i<30; i++) {
@@ -315,13 +324,16 @@ void ClearUndo () { // Undo 맵 배열 초기화 함수
     }
   }
 
-  int LoadUndo () { // 저장된 Undo 맵 배열 불러오기 함수
-    cntmv++;
-    cntud--;
-    if (cntud < 0 || undomap[0][0][0]=='X'){
+  int LoadUndo () { // 저장된 Undo 맵 배열 불러오기 함수]
+    if (cntud <= 0 || undomap[0][0][0]=='X'){
       printf("되돌리기를 할 수 없습니다.\n");
       return 0;
     }
+    cntmv++;
+    if(cntud!=0){
+        cntud--;
+    }
+    
 
     for (int i=0; i<30; i++) {
       for (int j=0; j<30; j++) {
@@ -342,5 +354,38 @@ void ClearUndo () { // Undo 맵 배열 초기화 함수
         }
     }
     NowArr();
+    LocateCharacter();
     return 0;
   }
+  void SaveMap() {//맵 저장(레벨,움직인횟수,맵정보), 없으면 생성하기
+	system("clear");
+	FILE* fp;
+	fp = fopen("save", "w");
+	fprintf(fp, "%d\n", level);
+	fprintf(fp, "%d\n", cntmv);
+	for (int i = 0; i < 30; i++) {
+		if (arr[i][0] == 'X') {//End of Map까지
+			break;
+		}
+		fprintf(fp, "%s\n", arr[i]);
+	}
+	printf("%d 레벨 스테이지 저장 완료\n",level+1);
+	fclose(fp);
+}
+void LoadMap() {
+	FILE* fp;
+	if ((fp = fopen("save", "r")) == NULL) {
+		printf("저장된 파일이 없습니다!\n");
+		return;
+	}
+	ClearArr();//맵초기화
+	ClearUndo();//undo 정보 초기화
+	fscanf(fp, "%d\n", &level);
+	fscanf(fp, "%d\n", &cntmv);
+	for (int i = 0; feof(fp) == 0; i++)
+		fscanf(fp, "%s\n", &arr[i]);
+
+	NowArr();
+	printf("%d 레벨 스테이지 로딩 완료\n",level+1);
+	fclose(fp);
+}
