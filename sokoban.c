@@ -49,6 +49,7 @@ int main() { // .==빈칸, @==캐릭터, #==벽, $==박스, O==박스를 채울곳
     for (;level<5;level++){
         ClearArr();
         ClearUndo();
+        x=-1, y=-1;
         MakeArr();
         CheckArr();
         if (correctmap==0)
@@ -83,6 +84,7 @@ void Command() { // 명령어 실행 함수
         }
         if (cmd=='r'){ // 이번 맵 다시시작 명령
             printf("이번 맵을 다시시작합니다.\n");
+            x=-1, y=-1;
             MakeArr();
             NowArr();
         }
@@ -233,12 +235,16 @@ int MoveCharacter(char c) {
     case '#':
     {
       NowArr();
+      x -= moveX;
+      y -= moveY;
       return 0;
       break;
     }
     case '$':
     {
       if (arr[yy][xx] == '#' || arr[yy][xx] == '$'){
+        x -= moveX;
+        y -= moveY;
         NowArr();
         return 0;
       }
