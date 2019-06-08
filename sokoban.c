@@ -11,6 +11,7 @@ int ex=0; // 게임종료 체크
 int cntmv=0; // 이동 횟수
 int cntud=5; // Undo 제한 횟수
 int x=-1, y=-1;
+int left_whole;
 
 int getch(); // getch함수 생성
 void MakeMap(); // 전체 맵을 파일에서 받아오는 함수
@@ -156,9 +157,13 @@ void MakeMap(){ // 전체 맵을 파일에서 받아오는 함수
 }
 
 void MakeArr() { // 맵을 arr로 받아오는 함수
+left_whole=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
             arr[i][j]=allmap[level][i][j];
+            if(allmap[level][i][j]=='O'){
+                left_whole++;
+            }
         }
     }
 }
@@ -270,14 +275,18 @@ int MoveCharacter(char c) {
 }
 
 int CheckClear() { // 맵 클리어 체크 함수
-    int chk=1;
+    int chk=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
-            if (arr[i][j]=='O')
-                chk=0;
+            if (allmap[level][i][j]=='O'&&arr[i][j]=='$'){
+               chk++;
+            }     
         }
     }
-    return chk;
+    if(chk==left_whole){
+        return 1;
+    }
+    return 0;
 }
 
 void DisplayHelp(){ // 명령어 목록을 보여주는 함수
