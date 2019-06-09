@@ -61,8 +61,8 @@ int main() { // .==빈칸, @==캐릭터, #==벽, $==박스, O==박스를 채울�
         CheckArr();
         if (correctmap==0)
             return 0;
-        else
-            printf("Start Map%d!\n", level+1);
+        if (correctmap==2)
+            continue;
         Command();
         if (ex) // 게임 종료 명령
             break;
@@ -74,16 +74,20 @@ int main() { // .==빈칸, @==캐릭터, #==벽, $==박스, O==박스를 채울�
 }
 
 void Command() { // 명령어 실행 함수
-    
-    if(x == -1 && y == -1) {
+    if(x == -1 && y == -1)
         LocateCharacter();
-    }
     NowArr();
     while (1){
         char cmd;
         cmd=getch();
-        if (cmd=='h' || cmd=='j' || cmd=='k' || cmd=='l') // 이동 명령
+        if (cmd=='h' || cmd=='j' || cmd=='k' || cmd=='l'){ // 이동 명령
             MoveCharacter(cmd);
+            if (CheckClear()){// 맵 클리어 체크
+                printf("Clear Map! %s!\n총 이동횟수는 %d번 입니다\n", username, cntmv);
+	        SaveRanking();
+                break;
+            }
+        }
         if (cmd=='n'){ // 처음부터 다시시작 명령
             level=-1;
             printf("처음부터 다시시작합니다.\n");
@@ -94,7 +98,6 @@ void Command() { // 명령어 실행 함수
             x=-1, y=-1;
             MakeArr();
             NowArr();
-            LocateCharacter();
         }
         if (cmd=='e'){ // 게임 종료 명령
             ex=1;
@@ -124,12 +127,6 @@ void Command() { // 명령어 실행 함수
         }
         if (cmd=='u') // 맵 되돌리기 명령
             LoadUndo();
-            ;
-        if (CheckClear()){// 맵 클리어 체크
-            printf("Clear Map! %s!\n총 이동횟수는 %d번 입니다\n", username, cntmv);
-	    SaveRanking();
-            break;
-        }
     }
 }
 
@@ -203,6 +200,10 @@ void CheckArr() { // 잘못된 맵인지 체크하는 함수
         printf("Map%d is Wrong Map!\n", level+1);
         correctmap=0;
     }
+    else if (arr[0][0]=='X'){
+        printf("Can't find Map%d\n", level+1);
+        correctmap=2;
+    }    
     else
         printf("Map%d is Correct Map!\n", level+1);
 }
@@ -240,9 +241,8 @@ void LocateCharacter () {
 int MoveCharacter(char c) {
   cntmv++;
   SaveUndo();
-  if(x == -1 && y == -1) {
+  if(x == -1 && y == -1)
     LocateCharacter();
-  }
   int moveX = 0, moveY = 0;
   switch (c) {
     case 'h':
@@ -299,12 +299,13 @@ int CheckClear() { // 맵 클리어 체크 함수
     int chk=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
-            if (allmap[level][i][j]=='O'&&arr[i][j]=='$'){
+            if (arr[i][j]=='$' && allmap[level][i][j]=='O'){
                chk++;
             }     
         }
     }
-    if(chk==left_whole){
+    printf("남은 목표 수: %d\n", left_whole-chk);
+    if(left_whole==chk){
         return 1;
     }
     return 0;
@@ -324,8 +325,6 @@ void ClearArr(){ // 배열 비우는 함수
 }
 
 void ClearUndo () { // Undo 맵 배열 초기화 함수
-  x=-1;
-  y=-1;
   cntud = 5;
   for (int x=0; x<5; x++) {
     for (int i=0; i<30; i++) {
@@ -390,7 +389,9 @@ void ClearUndo () { // Undo 맵 배열 초기화 함수
 	FILE* fp;
 	fp = fopen("save", "w");
 	fprintf(fp, "%d\n", level);
+        fprintf(fp, "%s\n", username);
 	fprintf(fp, "%d\n", cntmv);
+        fprintf(fp, "%d\n", cntud);
 	for (int i = 0; i < 30; i++) {
 		if (arr[i][0] == 'X') {//End of Map까지
 			break;
@@ -409,7 +410,9 @@ void LoadMap() {
 	ClearArr();//맵초기화
 	ClearUndo();//undo 정보 초기화
 	fscanf(fp, "%d\n", &level);
-	fscanf(fp, "%d\n", &cntmv);
+	fscanf(fp, "%s\n", &username);
+        fscanf(fp, "%d\n", &cntmv);
+	fscanf(fp, "%d\n", &cntud);
 	for (int i = 0; feof(fp) == 0; i++)
 		fscanf(fp, "%s\n", &arr[i]);
 
