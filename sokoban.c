@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <termio.h>
 #include <windows.h>
 char allmap[5][31][31]; // 전체 맵 배열
