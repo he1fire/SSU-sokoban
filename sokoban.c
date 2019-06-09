@@ -1,36 +1,37 @@
 #include <stdio.h>
 #include <termio.h>
 #include <windows.h>
-char allmap[5][31][31]; // ÀüÃ¼ ¸Ê ¹è¿­
-char arr[31][31]; // ÀÌ¹ø ¶ó¿îµå ¸Ê ¹è¿­
-char username[10]; // À¯Àú ÀÌ¸§
-char undomap[5][31][31]; // Undo ¸Ê ¹è¿­
-int correctmap=1; // Àß¸øµÈ¸Ê Ã¼Å©
-int level=0; // ÇöÀç ¶ó¿îµå
-int ex=0; // °ÔÀÓÁ¾·á Ã¼Å©
-int cntmv=0; // ÀÌµ¿ È½¼ö
-int cntud=5; // Undo Á¦ÇÑ È½¼ö
+char allmap[5][31][31]; // ì „ì²´ ë§µ ë°°ì—´
+char arr[31][31]; // ì´ë²ˆ ë¼ìš´ë“œ ë§µ ë°°ì—´
+char username[10]; // ìœ ì € ì´ë¦„
+char undomap[5][31][31]; // Undo ë§µ ë°°ì—´
+int correctmap=1; // ì˜ëª»ëœë§µ ì²´í¬
+int level=0; // í˜„ì¬ ë¼ìš´ë“œ
+int ex=0; // ê²Œì„ì¢…ë£Œ ì²´í¬
+int cntmv=0; // ì´ë™ íšŸìˆ˜
+int cntud=5; // Undo ì œí•œ íšŸìˆ˜
 int x=-1, y=-1;
 int left_whole;
 
-int getch(); // getchÇÔ¼ö »ı¼º
-void MakeMap(); // ÀüÃ¼ ¸ÊÀ» ÆÄÀÏ¿¡¼­ ¹Ş¾Æ¿À´Â ÇÔ¼ö
-void MakeArr(); // ¸ÊÀ» arr·Î ¹Ş¾Æ¿À´Â ÇÔ¼ö
-void CheckArr(); // Àß¸øµÈ ¸ÊÀÎÁö Ã¼Å©ÇÏ´Â ÇÔ¼ö
-void NowArr(); // ÇöÀç ¸Ê»óÅÂ º¸¿©ÁÖ±â
-void ClearArr(); // ¹è¿­ ºñ¿ì´Â ÇÔ¼ö
-int CheckClear(); // ¸Ê Å¬¸®¾î Ã¼Å© ÇÔ¼ö
-void Command(); // ¸í·É¾î ½ÇÇà ÇÔ¼ö
-void DisplayHelp(); // ¸í·É¾î ¸ñ·ÏÀ» º¸¿©ÁÖ´Â ÇÔ¼ö
-void ClearUndo(); // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
-void SaveUndo(); // Undo ¸Ê ¹è¿­ ÀúÀå ÇÔ¼ö
-int LoadUndo(); // ÀúÀåµÈ Undo ¸Ê ºÒ·¯¿À±â ÇÔ¼ö
+int getch(); // getchí•¨ìˆ˜ ìƒì„±
+void MakeMap(); // ì „ì²´ ë§µì„ íŒŒì¼ì—ì„œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
+void MakeArr(); // ë§µì„ arrë¡œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
+void CheckArr(); // ì˜ëª»ëœ ë§µì¸ì§€ ì²´í¬í•˜ëŠ” í•¨ìˆ˜
+void NowArr(); // í˜„ì¬ ë§µìƒíƒœ ë³´ì—¬ì£¼ê¸°
+void ClearArr(); // ë°°ì—´ ë¹„ìš°ëŠ” í•¨ìˆ˜
+int CheckClear(); // ë§µ í´ë¦¬ì–´ ì²´í¬ í•¨ìˆ˜
+void Command(); // ëª…ë ¹ì–´ ì‹¤í–‰ í•¨ìˆ˜
+void DisplayHelp(); // ëª…ë ¹ì–´ ëª©ë¡ì„ ë³´ì—¬ì£¼ëŠ” í•¨ìˆ˜
+void ClearUndo(); // Undo ë§µ ë°°ì—´ ì´ˆê¸°í™” í•¨ìˆ˜
+void SaveUndo(); // Undo ë§µ ë°°ì—´ ì €ì¥ í•¨ìˆ˜
+int LoadUndo(); // ì €ì¥ëœ Undo ë§µ ë¶ˆëŸ¬ì˜¤ê¸° í•¨ìˆ˜
+void SaveRanking(); // ë­í‚¹ ì„¸ì´ë¸Œ í•¨ìˆ˜
 void SaveMap();
 void LoadMap();
 void LocateCharacter();
 int MoveCharacter(char c);
 
-int getch(){ // getchÇÔ¼ö »ı¼º
+int getch(){ // getchí•¨ìˆ˜ ìƒì„±
     int ch;
     struct termios buf, save;
     tcgetattr(0,&save);
@@ -44,9 +45,9 @@ int getch(){ // getchÇÔ¼ö »ı¼º
     return ch;
 }
 
-int main() { // .==ºóÄ­, @==Ä³¸¯ÅÍ, #==º®, $==¹Ú½º, O==¹Ú½º¸¦ Ã¤¿ï°÷
+int main() { // .==ë¹ˆì¹¸, @==ìºë¦­í„°, #==ë²½, $==ë°•ìŠ¤, O==ë°•ìŠ¤ë¥¼ ì±„ìš¸ê³³
     MakeMap();
-    printf ("ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä: ");
+    printf ("ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”: ");
     scanf("%s", &username);
     printf("Hello %s!\n", username);
     for (;level<5;level++){
@@ -60,16 +61,16 @@ int main() { // .==ºóÄ­, @==Ä³¸¯ÅÍ, #==º®, $==¹Ú½º, O==¹Ú½º¸¦ Ã¤¿ï°÷
         else
             printf("Start Map%d!\n", level+1);
         Command();
-        if (ex) // °ÔÀÓ Á¾·á ¸í·É
+        if (ex) // ê²Œì„ ì¢…ë£Œ ëª…ë ¹
             break;
         cntmv=0;
     }
     if (!ex)
-        printf("\n¸ğµç¸ÊÀ» Å¬¸®¾î ÇÏ¿´½À´Ï´Ù\n");
+        printf("\nëª¨ë“ ë§µì„ í´ë¦¬ì–´ í•˜ì˜€ìŠµë‹ˆë‹¤\n");
     return 0;
 }
 
-void Command() { // ¸í·É¾î ½ÇÇà ÇÔ¼ö
+void Command() { // ëª…ë ¹ì–´ ì‹¤í–‰ í•¨ìˆ˜
     
     if(x == -1 && y == -1) {
         LocateCharacter();
@@ -78,62 +79,63 @@ void Command() { // ¸í·É¾î ½ÇÇà ÇÔ¼ö
     while (1){
         char cmd;
         cmd=getch();
-        if (cmd=='h' || cmd=='j' || cmd=='k' || cmd=='l') // ÀÌµ¿ ¸í·É
+        if (cmd=='h' || cmd=='j' || cmd=='k' || cmd=='l') // ì´ë™ ëª…ë ¹
             MoveCharacter(cmd);
-        if (cmd=='n'){ // Ã³À½ºÎÅÍ ´Ù½Ã½ÃÀÛ ¸í·É
+        if (cmd=='n'){ // ì²˜ìŒë¶€í„° ë‹¤ì‹œì‹œì‘ ëª…ë ¹
             level=-1;
-            printf("Ã³À½ºÎÅÍ ´Ù½Ã½ÃÀÛÇÕ´Ï´Ù.\n");
+            printf("ì²˜ìŒë¶€í„° ë‹¤ì‹œì‹œì‘í•©ë‹ˆë‹¤.\n");
             break;
         }
-        if (cmd=='r'){ // ÀÌ¹ø ¸Ê ´Ù½Ã½ÃÀÛ ¸í·É
-            printf("ÀÌ¹ø ¸ÊÀ» ´Ù½Ã½ÃÀÛÇÕ´Ï´Ù.\n");
+        if (cmd=='r'){ // ì´ë²ˆ ë§µ ë‹¤ì‹œì‹œì‘ ëª…ë ¹
+            printf("ì´ë²ˆ ë§µì„ ë‹¤ì‹œì‹œì‘í•©ë‹ˆë‹¤.\n");
             x=-1, y=-1;
             MakeArr();
             NowArr();
             LocateCharacter();
         }
-        if (cmd=='e'){ // °ÔÀÓ Á¾·á ¸í·É
+        if (cmd=='e'){ // ê²Œì„ ì¢…ë£Œ ëª…ë ¹
             ex=1;
-            printf("°ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù.\n");
+            printf("ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
             break;
         }
-        if (cmd=='x') {// ÀÓ½Ã Å¬¸®¾î ¸í·É¾î (³ªÁß¿¡ Áö¿ï¿¹Á¤)
+        if (cmd=='x') {// ì„ì‹œ í´ë¦¬ì–´ ëª…ë ¹ì–´ (ë‚˜ì¤‘ì— ì§€ìš¸ì˜ˆì •)
             break;
         }
-        if (cmd=='d') // ¸í·É¾î ¸ñ·Ï º¸¿©ÁÖ±â ¸í·É
+        if (cmd=='d') // ëª…ë ¹ì–´ ëª©ë¡ ë³´ì—¬ì£¼ê¸° ëª…ë ¹
             DisplayHelp();
-        if (cmd=='s') // ¸Ê ¼¼ÀÌºê ¸í·É
+        if (cmd=='s') // ë§µ ì„¸ì´ë¸Œ ëª…ë ¹
             SaveMap();
-        if (cmd=='f'){ // ¸Ê ºÒ·¯¿À±â ¸í·É
+        if (cmd=='f'){ // ë§µ ë¶ˆëŸ¬ì˜¤ê¸° ëª…ë ¹
             LoadMap();
             LocateCharacter();
         }
-        if (cmd=='t'){ // ·©Å· ºÒ·¯¿À±â ¸í·É
+        if (cmd=='t'){ // ë­í‚¹ ë¶ˆëŸ¬ì˜¤ê¸° ëª…ë ¹
             ;
         }
-        if (cmd=='u') // ¸Ê µÇµ¹¸®±â ¸í·É
+        if (cmd=='u') // ë§µ ë˜ëŒë¦¬ê¸° ëª…ë ¹
             LoadUndo();
             ;
-        if (CheckClear()){// ¸Ê Å¬¸®¾î Ã¼Å©
-            printf("Clear Map! %s!\nÃÑ ÀÌµ¿È½¼ö´Â %d¹ø ÀÔ´Ï´Ù\n", username, cntmv);
+        if (CheckClear()){// ë§µ í´ë¦¬ì–´ ì²´í¬
+            printf("Clear Map! %s!\nì´ ì´ë™íšŸìˆ˜ëŠ” %dë²ˆ ì…ë‹ˆë‹¤\n", username, cntmv);
+	    SaveRanking();
             break;
         }
     }
 }
 
-void MakeMap(){ // ÀüÃ¼ ¸ÊÀ» ÆÄÀÏ¿¡¼­ ¹Ş¾Æ¿À´Â ÇÔ¼ö
+void MakeMap(){ // ì „ì²´ ë§µì„ íŒŒì¼ì—ì„œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
     FILE *fp;
     fp=fopen("map", "r");
     fscanf(fp,"%s");
     for (int x=0;feof(fp)==0;x++){
-        char newmap[31][31]; // ÀÓ½Ã ¸Ê ¹è¿­
+        char newmap[31][31]; // ì„ì‹œ ë§µ ë°°ì—´
         for (int i=0;i<30;i++){
             for (int j=0;j<30;j++){
                 newmap[i][j]='X';
             }
         }
         for (int i=0;1;i++){
-            char str[30]; // ÇÑÁÙ ÀÔ·Â¹Ş´Â ¹è¿­
+            char str[30]; // í•œì¤„ ì…ë ¥ë°›ëŠ” ë°°ì—´
             for (int j=0;j<30;j++){
                 str[j]='X';
             }
@@ -156,7 +158,7 @@ void MakeMap(){ // ÀüÃ¼ ¸ÊÀ» ÆÄÀÏ¿¡¼­ ¹Ş¾Æ¿À´Â ÇÔ¼ö
     fclose(fp);
 }
 
-void MakeArr() { // ¸ÊÀ» arr·Î ¹Ş¾Æ¿À´Â ÇÔ¼ö
+void MakeArr() { // ë§µì„ arrë¡œ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
 left_whole=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
@@ -168,7 +170,7 @@ left_whole=0;
     }
 }
 
-void CheckArr() { // Àß¸øµÈ ¸ÊÀÎÁö Ã¼Å©ÇÏ´Â ÇÔ¼ö
+void CheckArr() { // ì˜ëª»ëœ ë§µì¸ì§€ ì²´í¬í•˜ëŠ” í•¨ìˆ˜
     int check1=0, check2=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
@@ -186,7 +188,7 @@ void CheckArr() { // Àß¸øµÈ ¸ÊÀÎÁö Ã¼Å©ÇÏ´Â ÇÔ¼ö
         printf("Map%d is Correct Map!\n", level+1);
 }
 
-void NowArr() { // ÇöÀç ¸Ê»óÅÂ º¸¿©ÁÖ±â
+void NowArr() { // í˜„ì¬ ë§µìƒíƒœ ë³´ì—¬ì£¼ê¸°
     system("clear");
     for (int i=0;i<30;i++){
         if (arr[i][0]=='X')
@@ -201,7 +203,7 @@ void NowArr() { // ÇöÀç ¸Ê»óÅÂ º¸¿©ÁÖ±â
         }
         printf("\n");
     }
-    printf ("\n\nÀÌµ¿È½¼ö: %d\n³²Àº µÇµ¹¸®±âÈ½¼ö: %d\n", cntmv, cntud);
+    printf ("\n\nì´ë™íšŸìˆ˜: %d\në‚¨ì€ ë˜ëŒë¦¬ê¸°íšŸìˆ˜: %d\n", cntmv, cntud);
 }
 
 void LocateCharacter () {
@@ -274,7 +276,7 @@ int MoveCharacter(char c) {
   return 0;
 }
 
-int CheckClear() { // ¸Ê Å¬¸®¾î Ã¼Å© ÇÔ¼ö
+int CheckClear() { // ë§µ í´ë¦¬ì–´ ì²´í¬ í•¨ìˆ˜
     int chk=0;
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
@@ -289,12 +291,12 @@ int CheckClear() { // ¸Ê Å¬¸®¾î Ã¼Å© ÇÔ¼ö
     return 0;
 }
 
-void DisplayHelp(){ // ¸í·É¾î ¸ñ·ÏÀ» º¸¿©ÁÖ´Â ÇÔ¼ö
+void DisplayHelp(){ // ëª…ë ¹ì–´ ëª©ë¡ì„ ë³´ì—¬ì£¼ëŠ” í•¨ìˆ˜
     system("clear");
-    printf("h(¿ŞÂÊ), j(¾Æ·¡), k(À§), l(¿À¸¥ÂÊ)\nu(undo)\nr(replay)\nn(new)\ne(exit)\ns(save)\nf(file load)\nd(display help)\nt(top)\n");
+    printf("h(ì™¼ìª½), j(ì•„ë˜), k(ìœ„), l(ì˜¤ë¥¸ìª½)\nu(undo)\nr(replay)\nn(new)\ne(exit)\ns(save)\nf(file load)\nd(display help)\nt(top)\n");
 }
 
-void ClearArr(){ // ¹è¿­ ºñ¿ì´Â ÇÔ¼ö
+void ClearArr(){ // ë°°ì—´ ë¹„ìš°ëŠ” í•¨ìˆ˜
     for (int i=0;i<30;i++){
         for (int j=0;j<30;j++){
             arr[i][j]='X';
@@ -302,7 +304,7 @@ void ClearArr(){ // ¹è¿­ ºñ¿ì´Â ÇÔ¼ö
     }
 }
 
-void ClearUndo () { // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
+void ClearUndo () { // Undo ë§µ ë°°ì—´ ì´ˆê¸°í™” í•¨ìˆ˜
   x=-1;
   y=-1;
   cntud = 5;
@@ -315,7 +317,7 @@ void ClearUndo () { // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
   }
 }
 
-  void SaveUndo () { // Undo ¸Ê ¹è¿­¿¡ ÇöÀç ¸Ê ÀúÀå
+  void SaveUndo () { // Undo ë§µ ë°°ì—´ì— í˜„ì¬ ë§µ ì €ì¥
     for (int x=4; x>0; x--) {
       for (int i=0; i<30; i++) {
         for (int j=0; j<30; j++) {
@@ -331,9 +333,9 @@ void ClearUndo () { // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
     }
   }
 
-  int LoadUndo () { // ÀúÀåµÈ Undo ¸Ê ¹è¿­ ºÒ·¯¿À±â ÇÔ¼ö]
+  int LoadUndo () { // ì €ì¥ëœ Undo ë§µ ë°°ì—´ ë¶ˆëŸ¬ì˜¤ê¸° í•¨ìˆ˜]
     if (cntud <= 0 || undomap[0][0][0]=='X'){
-      printf("µÇµ¹¸®±â¸¦ ÇÒ ¼ö ¾ø½À´Ï´Ù.\n");
+      printf("ë˜ëŒë¦¬ê¸°ë¥¼ í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n");
       return 0;
     }
     cntmv++;
@@ -364,35 +366,82 @@ void ClearUndo () { // Undo ¸Ê ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
     LocateCharacter();
     return 0;
   }
-  void SaveMap() {//¸Ê ÀúÀå(·¹º§,¿òÁ÷ÀÎÈ½¼ö,¸ÊÁ¤º¸), ¾øÀ¸¸é »ı¼ºÇÏ±â
+  void SaveMap() {//ë§µ ì €ì¥(ë ˆë²¨,ì›€ì§ì¸íšŸìˆ˜,ë§µì •ë³´), ì—†ìœ¼ë©´ ìƒì„±í•˜ê¸°
 	system("clear");
 	FILE* fp;
 	fp = fopen("save", "w");
 	fprintf(fp, "%d\n", level);
 	fprintf(fp, "%d\n", cntmv);
 	for (int i = 0; i < 30; i++) {
-		if (arr[i][0] == 'X') {//End of Map±îÁö
+		if (arr[i][0] == 'X') {//End of Mapê¹Œì§€
 			break;
 		}
 		fprintf(fp, "%s\n", arr[i]);
 	}
-	printf("%d ·¹º§ ½ºÅ×ÀÌÁö ÀúÀå ¿Ï·á\n",level+1);
+	printf("%d ë ˆë²¨ ìŠ¤í…Œì´ì§€ ì €ì¥ ì™„ë£Œ\n",level+1);
 	fclose(fp);
 }
 void LoadMap() {
 	FILE* fp;
 	if ((fp = fopen("save", "r")) == NULL) {
-		printf("ÀúÀåµÈ ÆÄÀÏÀÌ ¾ø½À´Ï´Ù!\n");
+		printf("ì €ì¥ëœ íŒŒì¼ì´ ì—†ìŠµë‹ˆë‹¤!\n");
 		return;
 	}
-	ClearArr();//¸ÊÃÊ±âÈ­
-	ClearUndo();//undo Á¤º¸ ÃÊ±âÈ­
+	ClearArr();//ë§µì´ˆê¸°í™”
+	ClearUndo();//undo ì •ë³´ ì´ˆê¸°í™”
 	fscanf(fp, "%d\n", &level);
 	fscanf(fp, "%d\n", &cntmv);
 	for (int i = 0; feof(fp) == 0; i++)
 		fscanf(fp, "%s\n", &arr[i]);
 
 	NowArr();
-	printf("%d ·¹º§ ½ºÅ×ÀÌÁö ·Îµù ¿Ï·á\n",level+1);
+	printf("%d ë ˆë²¨ ìŠ¤í…Œì´ì§€ ë¡œë”© ì™„ë£Œ\n",level+1);
 	fclose(fp);
+}
+void SaveRanking(){// ë­í‚¹ ì„¸ì´ë¸Œ í•¨ìˆ˜
+    FILE *fp, *dfp;
+    fp=fopen("ranking","r");
+    int cntrank=0;
+    int dlevel=0, dcntmv=0;
+    char dusername[10];
+    while (1){ // ì‚¬ì´ì— ì“¸ë•Œ ì•ì—ì˜¤ëŠ” ë­í‚¹ ê°œìˆ˜ ì„¸ê¸°
+        fscanf(fp, "%d %s %d", &dlevel, &dusername, &dcntmv);
+        if (dlevel<level+1 || (dlevel==level+1 && dcntmv<=cntmv))
+            cntrank++;
+        else
+            break;
+    }
+    fclose(fp);
+    fp=fopen("ranking","r");
+    dfp=fopen("newrank","w");
+    for (int i=0;i<cntrank;i++){
+        fscanf(fp, "%d %s %d", &dlevel, &dusername, &dcntmv);
+        fprintf(dfp, "%d %s %d\n", dlevel, dusername, dcntmv);
+    }
+    fprintf(dfp, "%d %s %d\n", level+1, username, cntmv);
+    while (!feof(fp)){
+        fscanf(fp, "%d %s %d", &dlevel, &dusername, &dcntmv);
+        if (dlevel!=999)
+            fprintf(dfp, "%d %s %d\n", dlevel, dusername, dcntmv);
+        else{
+            fprintf(dfp, "999 999 999");
+            break;
+        }
+    }
+    fclose(fp);
+    fclose(dfp);
+    fp=fopen("ranking","w");
+    dfp=fopen("newrank","r");
+    while (!feof(dfp)){
+        fscanf(dfp, "%d %s %d", &dlevel, &dusername, &dcntmv);
+        if (dlevel!=999)
+            fprintf(fp, "%d %s %d\n", dlevel, dusername, dcntmv);
+        else{
+            fprintf(fp, "999 999 999");
+            break;
+        }
+    }
+    fclose(fp);
+    fclose(dfp);
+    remove("newrank");
 }
