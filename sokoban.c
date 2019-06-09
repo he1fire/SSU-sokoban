@@ -10,7 +10,7 @@ int level=0; // 현재 라운드
 int ex=0; // 게임종료 체크
 int cntmv=0; // 이동 횟수
 int cntud=5; // Undo 제한 횟수
-int x=-1, y=-1;
+int x=-1, y=-1; // 플레이어 위치
 int left_whole;
 
 int getch(); // getch함수 생성
@@ -29,10 +29,10 @@ void CheckRanking(); // 랭킹 파일이 없을 시 만드는 함수
 void SaveRanking(); // 랭킹 세이브 함수
 void LoadRanking(); // 랭킹 불러오기 함수
 void LoadAllRanking(); // 모든랭킹 불러오기 함수
-void SaveMap();
-void LoadMap();
-void LocateCharacter();
-int MoveCharacter(char c);
+void SaveMap(); // 맵을 저장하는 함수
+void LoadMap(); // 맵을 불러오는 함수
+void LocateCharacter(); // 플레이어의 위치를 찾는 함수
+int MoveCharacter(char c); // 플레이어의 움직임을 실행하는 
 
 int getch(){ // getch함수 생성
     int ch;
@@ -226,7 +226,7 @@ void NowArr() { // 현재 맵상태 보여주기
     printf ("\n\n이동횟수: %d\n남은 되돌리기횟수: %d\n", cntmv, cntud);
 }
 
-void LocateCharacter () {
+void LocateCharacter () { // 플레이어의 위치 찾기
   for (int i=0; i<30; i++) {
     for (int j=0; j<30; j++) {
       if (arr[i][j]=='@'){
@@ -238,7 +238,7 @@ void LocateCharacter () {
   }
 }
 
-int MoveCharacter(char c) {
+int MoveCharacter(char c) { // 플레이어의 이동 실행
   cntmv++;
   SaveUndo();
   if(x == -1 && y == -1)
@@ -262,8 +262,8 @@ int MoveCharacter(char c) {
   y += moveY;
   int xx = x + moveX;
   int yy = y + moveY;
-  switch (arr[y][x]) {
-    case '#':
+  switch (arr[y][x]) { 
+    case '#': // 벽을 만났을 경우
     {
       NowArr();
       x -= moveX;
@@ -271,9 +271,9 @@ int MoveCharacter(char c) {
       return 0;
       break;
     }
-    case '$':
+    case '$': // 박스를 만났을 경우
     {
-      if (arr[yy][xx] == '#' || arr[yy][xx] == '$'){
+      if (arr[yy][xx] == '#' || arr[yy][xx] == '$'){ // 박스 앞에 벽 or 박스가 있는 경우
         x -= moveX;
         y -= moveY;
         NowArr();
@@ -281,13 +281,13 @@ int MoveCharacter(char c) {
       }
     }
       arr[yy][xx] = '$';
-      if (allmap[level][y][x] == 'O')
+      if (allmap[level][y][x] == 'O') // 칸에 있었다면 원래대로 돌려놓기
         arr[y][x] = 'O';
       else
         arr[y][x] = '.';
   }
   arr[y][x] = '@';
-  if (allmap[level][y-moveY][x-moveX] == 'O')
+  if (allmap[level][y-moveY][x-moveX] == 'O') // 칸에 있었다면 원래대로 
     arr[y-moveY][x-moveX] = 'O';
   else
     arr[y-moveY][x-moveX] = '.';
