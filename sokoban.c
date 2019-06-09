@@ -104,9 +104,6 @@ void Command() { // 명령어 실행 함수
             printf("게임을 종료합니다.\n");
             break;
         }
-        if (cmd=='x') {// 임시 클리어 명령어 (나중에 지울예정)
-            break;
-        }
         if (cmd=='d') // 명령어 목록 보여주기 명령
             DisplayHelp();
         if (cmd=='s') // 맵 세이브 명령
