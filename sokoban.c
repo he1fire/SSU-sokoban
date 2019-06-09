@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <termio.h>
 #include <windows.h>
 char allmap[5][31][31]; // 전체 맵 배열
@@ -25,7 +25,10 @@ void DisplayHelp(); // 명령어 목록을 보여주는 함수
 void ClearUndo(); // Undo 맵 배열 초기화 함수
 void SaveUndo(); // Undo 맵 배열 저장 함수
 int LoadUndo(); // 저장된 Undo 맵 불러오기 함수
+void CheckRanking(); // 랭킹 파일이 없을 시 만드는 함수
 void SaveRanking(); // 랭킹 세이브 함수
+void LoadRanking(); // 랭킹 불러오기 함수
+void LoadAllRanking(); // 모든랭킹 불러오기 함수
 void SaveMap();
 void LoadMap();
 void LocateCharacter();
@@ -110,7 +113,14 @@ void Command() { // 명령어 실행 함수
             LocateCharacter();
         }
         if (cmd=='t'){ // 랭킹 불러오기 명령
-            ;
+            char R=0;
+            R=getchar();
+            if (R=='\n')
+                LoadAllRanking();
+            else if (R>='1' && R<='5')
+                LoadRanking(R-'0');
+            else
+                printf("없는 레벨입니다\n");
         }
         if (cmd=='u') // 맵 되돌리기 명령
             LoadUndo();
@@ -120,6 +130,15 @@ void Command() { // 명령어 실행 함수
 	    SaveRanking();
             break;
         }
+    }
+}
+
+void CheckRanking(){ // 랭킹 파일이 없을 시 만드는 함수
+    FILE *fp;
+    if ((fp=fopen("ranking","r"))==NULL){
+            fp=fopen("ranking","w");
+            fprintf(fp, "999 999 999");
+            fclose(fp);
     }
 }
 
@@ -444,4 +463,45 @@ void SaveRanking(){// 랭킹 세이브 함수
     fclose(fp);
     fclose(dfp);
     remove("newrank");
+}
+
+void LoadAllRanking(){ // 모든랭킹 불러오기 함수
+    system("clear");
+    int levelrank[6]={0}; // 레벨 확인
+    int checkrank[6]={0}; // 레밸내 등수 확인
+    FILE *fp;
+    fp=fopen("ranking","r");
+    for (int i=0;feof(fp)==0;){
+        int dlevel=0, dcntmv=0;
+        char dusername[10];
+        fscanf(fp, "%d %s %d", &dlevel, &dusername, &dcntmv);
+        if (dlevel==i+1 && levelrank[i]==0){
+            printf("\n---MAP %d RANKING---\nTOP  NAME       MOVE\n", i+1);
+            levelrank[i]=1;
+            i++;
+        }
+        if (dlevel<=5 && checkrank[i]<5){
+            printf("%d.   %-10s %-5d\n", checkrank[i]+1, dusername, dcntmv);
+            checkrank[i]++;
+        }
+    }
+    fclose(fp);
+}
+
+void LoadRanking(int x){ // 랭킹 불러오기 함수
+    system("clear");
+    int checkrank=0;
+    printf("---MAP %d RANKING---\nTOP  NAME       MOVE\n", x);
+    FILE *fp;
+    fp=fopen("ranking","r");
+    for (int i=0;feof(fp)==0;i++){
+        int dlevel=0, dcntmv=0;
+        char dusername[10];
+        fscanf(fp, "%d %s %d", &dlevel, &dusername, &dcntmv);
+        if (x==dlevel && checkrank<5){
+            printf("%d.   %-10s %-5d\n", checkrank+1, dusername, dcntmv);
+            checkrank++;
+        }
+    }
+    fclose(fp);
 }
